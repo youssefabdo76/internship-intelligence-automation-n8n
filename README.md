@@ -1,0 +1,69 @@
+# 2026 Free Corporate Internship Tracker  
+### Egyptian AI Student – Automation & Decision System
+
+## Overview
+This project is an **automation-based job intelligence system** designed to help students track **Summer 2026 internship opportunities** efficiently.
+
+Instead of manually checking job boards daily, the system:
+- Monitors internship postings automatically
+- Analyzes and scores each opportunity using an AI agent
+- Filters low-quality or irrelevant roles
+- Delivers only high-relevance opportunities via email
+
+The project is built as a **production-oriented n8n workflow**, focusing on reliability, decision logic, and clean data handling — not simple scraping.
+
+---
+
+## Problem Statement
+Students often miss internship opportunities due to:
+- High noise on job platforms (duplicate or low-quality listings)
+- Late discovery of openings
+- Lack of personalization for their background and skills
+
+This system addresses the problem by acting as a **decision layer**, not just a notifier.
+
+---
+
+## Key Features
+- ⏱️ **Scheduled & Manual Triggers**  
+  Runs automatically every 6 hours or manually via webhook.
+
+- 🌐 **Free & Safe Data Source**  
+  Uses Google News RSS to monitor LinkedIn job postings without scraping or violating platform policies.
+
+- 🧠 **AI-Based Job Scoring (0–100)**  
+  Each opportunity is evaluated based on:
+  - Technical relevance to AI / Software Engineering
+  - Remote or EMEA-friendly location
+  - Internship timing (Summer 2026)
+
+- 🚦 **Decision Gate**  
+  Only jobs with a score **above 70** are considered actionable.
+
+- 📧 **Smart Email Notifications**  
+  High-quality opportunities are sent with:
+  - Arabic AI-generated explanation
+  - Translated requirements
+  - A ready-to-use LinkedIn outreach message in English
+
+- 📊 **Lightweight State Storage**  
+  Google Sheets is used as a free, simple database for logging qualified opportunities.
+
+---
+
+## System Architecture
+
+
+Scheduler / Webhook
+↓
+RSS Feed Fetch
+↓
+Item Limiting & Rate Safety
+↓
+AI Analysis & Scoring
+↓
+JSON Validation & Parsing
+↓
+Score Filter (>70)
+↓
+Email Notification + Sheet Logging
