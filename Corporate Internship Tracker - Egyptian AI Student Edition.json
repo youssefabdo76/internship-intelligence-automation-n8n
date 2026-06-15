@@ -1,0 +1,354 @@
+{
+  "name": "2026 Free Corporate Internship Tracker - Egyptian AI Student Edition",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "984ba7c2-cfab-485a-a29a-eb20d07cf0d4",
+      "name": "Every 6 Hours",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "path": "manual-intern-trigger",
+        "options": {}
+      },
+      "id": "b96d524c-b0ea-440d-bd90-0771f7950f80",
+      "name": "Webhook (Manual)",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        832,
+        1168
+      ],
+      "webhookId": "manual-trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=site:linkedin.com/jobs+%22Internship+2026%22+Software+Engineering&hl=en-US&gl=US&ceid=US:en",
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "id": "30d359d4-f360-4db4-93a8-7cedbde4621c",
+      "name": "Fetch LinkedIn RSS (Free)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1056,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "maxItems": 3
+      },
+      "id": "f495dd12-4294-4400-924a-e20a7306cbd3",
+      "name": "Limit to Top 5",
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        1440,
+        1088
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "number": [
+            {
+              "value1": "={{ $json.score }}",
+              "operation": "larger",
+              "value2": 70
+            }
+          ]
+        }
+      },
+      "id": "2e197230-d525-4e7c-b192-9d0fc640c9ba",
+      "name": "Filter > 70 Score",
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 1,
+      "position": [
+        848,
+        1776
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "YOUR_SHEET_ID",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Job Title": "={{ $json.title }}",
+            "Score": "={{ $json.score }}",
+            "Summary": "={{ $json.role_details }}",
+            "Link": "={{ $json.link }}"
+          }
+        },
+        "options": {}
+      },
+      "id": "aad1300f-9c21-427e-ae7d-c075f68cb68d",
+      "name": "Google Sheets (Free DB)",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.2,
+      "position": [
+        1280,
+        1680
+      ]
+    },
+    {
+      "parameters": {
+        "sendTo": "youssefabdo9276@gmail.com",
+        "subject": "=={{ \"فرصة تدريب جديدة: \" + $json.title + \" (تقييم: \" + $json.score + \"%)\" }}",
+        "message": "=<div dir=\"rtl\" style=\"font-family: Arial, sans-serif; line-height: 1.6; color: #333;\">\n  <h2 style=\"color: #1a73e8;\">تحليل ذكاء اصطناعي لفرصة تدريب 2026</h2>\n  \n  <p><strong>العنوان:</strong> {{ $json.title }}</p>\n  <p><strong>درجة التوافق الشخصي:</strong> <span style=\"color: green; font-weight: bold;\">{{ $json.score }}%</span></p>\n  \n  <hr>\n  \n  <h3 style=\"color: #1a73e8;\">لماذا نرشح لك هذه الفرصة:</h3>\n  <p>{{ $json.role_details }}</p>\n  \n  <h3 style=\"color: #1a73e8;\">أهم المتطلبات (ترجمة للعربية):</h3>\n  <p>{{ $json.requirements }}</p>\n  \n  <hr>\n  \n  <h3 style=\"color: #1a73e8;\">رسالة مقترحة للتواصل (Outreach):</h3>\n  <div style=\"background-color: #f1f3f4; padding: 15px; border-radius: 5px; font-family: monospace; direction: ltr; text-align: left;\">\n    {{ $json.outreach }}\n  </div>\n  \n  <br>\n  <a href=\"{{ $json.link }}\" style=\"background-color: #1a73e8; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold;\">فتح الرابط والتقديم</a>\n</div>",
+        "options": {}
+      },
+      "id": "de69366d-e6d1-447e-b776-2c48f67a5f16",
+      "name": "Gmail Daily Summary",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1280,
+        1872
+      ],
+      "webhookId": "3a1d546e-3144-4b2d-ac0a-d56a23683c2b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "mI2Fg6uHmcK8BldS",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 2,
+        "unit": "seconds"
+      },
+      "id": "ec6c8085-ca0e-4228-9afe-3157a013b0d5",
+      "name": "Wait (API Safety)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [
+        960,
+        1392
+      ],
+      "webhookId": "068fde7a-b37a-4fd4-aecd-97a06c83ff4a"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ \"Act as a Recruitment Analysis Agent for an Egyptian CS student specializing in AI. \\n\\nInput Job: \" + $json.title + \"\\n\\nScoring Logic (0-100):\\n1. Technical Match (40%): How relevant is this to AI, Machine Learning, or Core Software Engineering?\\n2. Geographical Context (40%): Score highly if role is 'Remote', or mentions Visa/Relocation, or is in an EMEA hub. \\n3. Recency (20%): Must be Summer 2026. \\nNote: The user is a fast learner; don't penalize for complex tech stacks if the core domain matches. \\n\\nOutput MUST be a single JSON object with these exact keys:\\n- score: (numeric)\\n- role_details: (Detailed description in Arabic focusing on why it matches the AI profile)\\n- requirements: (Key skills/conditions in Arabic)\\n- outreach: (A professional short LinkedIn pitch in English referring to his AI background)\" }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        1136,
+        1392
+      ],
+      "id": "12058c72-32bb-4f0f-bac2-827c33947164",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "allam-2-7b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        1136,
+        1552
+      ],
+      "id": "632091b3-73cc-4ecc-ab64-e8c572103e1d",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "Nd9CCj66IHzj8P0W",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=site:linkedin.com/jobs+%22Internship+2026%22+Software+Engineering&hl=en-US&gl=US&ceid=US:en",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        1264,
+        1088
+      ],
+      "id": "f0626b3c-e031-48fd-96db-b391ee78c3df",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "jsCode": "let rawOutput = $input.item.json.output;\n\ntry {\n  const jsonMatch = rawOutput.match(/\\{[\\s\\S]*\\}/);\n  if (!jsonMatch) throw new Error(\"No JSON found\");\n  \n  let jsonString = jsonMatch[0].replace(/[\\u0000-\\u001F\\u007F-\\u009F]/g, \" \");\n  const data = JSON.parse(jsonString);\n\n  return {\n    score: data.score || 0,\n    role_details: data.role_details || \"لا توجد تفاصيل\",\n    requirements: data.requirements || \"غير محدد\",\n    outreach: data.outreach || \"\",\n    title: $node[\"Limit to Top 5\"].json.title,\n    link: $node[\"Limit to Top 5\"].json.link\n  };\n} catch (e) {\n  return { \n    score: 0,\n    role_details: \"Error parsing AI response\", \n    requirements: \"N/A\",\n    outreach: \"\",\n    title: $node[\"Limit to Top 5\"].json.title,\n    link: $node[\"Limit to Top 5\"].json.link\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        1392
+      ],
+      "id": "c3aa79ee-7b8f-41f5-bd6f-af779ee6981b",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "Fetch LinkedIn RSS (Free)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook (Manual)": {
+      "main": [
+        [
+          {
+            "node": "Fetch LinkedIn RSS (Free)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch LinkedIn RSS (Free)": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit to Top 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to Top 5": {
+      "main": [
+        [
+          {
+            "node": "Wait (API Safety)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait (API Safety)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Filter > 70 Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter > 70 Score": {
+      "main": [
+        [
+          {
+            "node": "Gmail Daily Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google Sheets (Free DB)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "versionId": "8ebcf0e3-4990-4039-a583-7425fb721ae9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "102adf9ce46aff744199885ea85a13bc06111725ea11316b7cf7d739be2424da"
+  },
+  "id": "lmzGfMQaJSawC3Myg3JDg",
+  "tags": []
+}
